@@ -1,3 +1,5 @@
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using VibeConnect.Storage;
 
@@ -32,6 +34,31 @@ public static class WebApplicationExtensions
             logger.LogError(ex, "An error occurred while performing migration.");
             throw;
         }
+    }
+    
+    public static void UseExceptionHandler(
+        this WebApplication app,
+        bool returnStackTrace = false)
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+        app.UseExceptionHandler(appError =>
+        {
+            appError.Run(context =>
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response.ContentType = "application/json";
+
+                var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+
+                if (contextFeature != null)
+                {
+                    logger.LogError(contextFeature.Error, "Unhadled Exception Occured");
+                }
+
+                return Task.CompletedTask;
+            });
+        });
     }
 
 }

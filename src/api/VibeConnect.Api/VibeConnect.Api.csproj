@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
@@ -31,6 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\libraries\VibeConnect.Shared\VibeConnect.Shared.csproj" />
       <ProjectReference Include="..\..\libraries\VibeConnect.Storage\VibeConnect.Storage.csproj" />
     </ItemGroup>
 
