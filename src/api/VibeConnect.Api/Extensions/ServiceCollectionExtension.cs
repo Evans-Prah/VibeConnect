@@ -1,7 +1,13 @@
+using System.Reflection;
 using System.Text.Json;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
+using VibeConnect.Api.Options;
+using VibeConnect.Auth.Module.Services;
 using VibeConnect.Shared.Models;
+using VibeConnect.Storage.Entities;
+using VibeConnect.Storage.Services;
 
 namespace VibeConnect.Api.Extensions;
 
@@ -59,5 +65,73 @@ public static class ServiceCollectionExtension
             });
 
         return services;
-    }    
+    } 
+    
+    public static IServiceCollection AddSwaggerGen(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string schemeName)
+    {
+        services.Configure<SwaggerDocsConfig>(c => configuration.GetSection(nameof(SwaggerDocsConfig)).Bind(c));
+
+        services.ConfigureOptions<ConfigureSwaggerOptions>();
+
+        var projName = Assembly.GetExecutingAssembly().GetName().Name;
+
+        services.AddSwaggerGen(c =>
+        {
+            c.EnableAnnotations();
+
+            c.AddSecurityDefinition(schemeName, new()
+            {
+                Description = $@"Enter '[schemeName]' [space] and then your token in the text input below.<br/>
+                      Example: '{schemeName} 12345abcd'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = schemeName
+            });
+
+            c.AddSecurityRequirement(new()
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = schemeName
+                        },
+                        Scheme = "oauth2",
+                        Name = schemeName,
+                        In = ParameterLocation.Header,
+                    },
+                    Array.Empty<string>()
+                }
+            });
+
+            c.DocumentFilter<AdditionalParametersDocumentFilter>();
+
+            c.ResolveConflictingActions(descriptions => descriptions.FirstOrDefault());
+            
+        });
+
+        return services;
+    }
+    
+    public static IServiceCollection AddBaseRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<IBaseRepository<User>, BaseRepository<User>>();
+       
+        return services;
+    }
+    
+    public static IServiceCollection AddAuthModuleServiceCollection(this IServiceCollection services)
+    {
+        services.AddScoped<IAuthService, AuthService>();
+       
+        return services;
+    }
+    
+    
 }

@@ -1,6 +1,11 @@
 using System.Net;
+using System.Reflection;
+using Asp.Versioning.ApiExplorer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerUI;
+using VibeConnect.Api.Options;
 using VibeConnect.Storage;
 
 namespace VibeConnect.Api.Extensions;
@@ -59,6 +64,57 @@ public static class WebApplicationExtensions
                 return Task.CompletedTask;
             });
         });
+    }
+
+    public static void UseSwaggerDoc(this WebApplication app)
+    {
+        var apiDocsConfig = app.Services.GetRequiredService<IOptions<SwaggerDocsConfig>>().Value;
+
+        var apiVersionDescription = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+        if (apiDocsConfig.ShowSwaggerUi)
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                var projName = Assembly.GetExecutingAssembly().GetName().Name;
+                foreach (var description in apiVersionDescription.ApiVersionDescriptions.Reverse())
+                {
+                    c.SwaggerEndpoint(
+                        $"/swagger/{description.GroupName}/swagger.json",
+                        $"{projName} - {description.GroupName}");
+                }
+
+                var submitMethods = Array.Empty<SubmitMethod>();
+
+                if (apiDocsConfig.EnableSwaggerTryIt && app.Environment.IsDevelopment())
+                {
+                    submitMethods = new SubmitMethod[]
+                    {
+                        SubmitMethod.Post,
+                        SubmitMethod.Get,
+                        SubmitMethod.Put,
+                        SubmitMethod.Patch,
+                        SubmitMethod.Delete,
+                    };
+                }
+
+                c.SupportedSubmitMethods(submitMethods);
+            });
+        }
+
+        if (apiDocsConfig.ShowRedocUi)
+        {
+            foreach (var description in apiVersionDescription.ApiVersionDescriptions.Reverse())
+            {
+                app.UseReDoc(options =>
+                {
+                    options.DocumentTitle = Assembly.GetExecutingAssembly().GetName().Name;
+                    options.RoutePrefix = $"api-docs-{description.GroupName}";
+                    options.SpecUrl = $"/swagger/{description.GroupName}/swagger.json";
+                });
+            }
+        }
     }
 
 }
