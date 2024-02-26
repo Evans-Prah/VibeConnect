@@ -35,6 +35,10 @@ public class User
     
     //public string NotificationPreferences { get; set; }
     //public string ThemePreferences { get; set; }
+
+    public string? RefreshToken { get; set; }
+    public DateTimeOffset? RefreshTokenAddedAt { get; set; }
+    public DateTimeOffset? RefreshTokenExpiryTime { get; set; }
 }
 
 public class ExternalLink
