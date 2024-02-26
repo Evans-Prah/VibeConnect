@@ -9,4 +9,6 @@ public interface IAuthService
         RegisterUserRequestDto registerUserRequestDto);
 
     Task<ApiResponse<LoginResponseDto>> Login(LoginRequestDto loginRequestDto);
+    Task<ApiResponse<TokenResponseDto>> RefreshToken(TokenRequestDto tokenRequestDto);
+    Task<ApiResponse<bool>> RevokeRefreshToken(string username);
 }

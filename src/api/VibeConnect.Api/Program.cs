@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using VibeConnect.Api.Extensions;
+using VibeConnect.Auth.Module.Options;
 using VibeConnect.Shared;
 using VibeConnect.Storage;
 
@@ -19,6 +20,8 @@ services.AddDbContextPool<ApplicationDbContext>(options =>
 services.AddBaseRepositories();
 services.AddAuthModuleServiceCollection();
 
+services.Configure<JwtConfig>(c=> config.GetSection(nameof(JwtConfig)).Bind(c));
+
 
 services.AddHealthChecks();
 services.AddCors(options => options
@@ -33,7 +36,9 @@ services.AddApiVersioning(1);
 
 services.AddScoped(typeof(ILoggerAdapter<>), typeof(LoggerAdapter<>));
 
-services.AddSwaggerGen(config, "Bearer");
+services.AddBearerAuthentication(config);
+
+services.AddSwaggerGen(config, $"{CommonConstants.AuthScheme.Bearer}");
 
 services.AddHttpLogging(options =>
 {

@@ -1,7 +1,9 @@
 using System.Net;
 using Mapster;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VibeConnect.Auth.Module.DTOs;
+using VibeConnect.Auth.Module.Options;
 using VibeConnect.Auth.Module.Utilities;
 using VibeConnect.Shared;
 using VibeConnect.Shared.Models;
@@ -10,8 +12,11 @@ using VibeConnect.Storage.Services;
 
 namespace VibeConnect.Auth.Module.Services;
 
-public class AuthService(ILoggerAdapter<AuthService> logger, IBaseRepository<User> userRepository) : IAuthService
+public class AuthService(ILoggerAdapter<AuthService> logger, IBaseRepository<User> userRepository, 
+    ITokenService tokenService, IOptions<JwtConfig> jwtOptions) : IAuthService
 {
+    private readonly JwtConfig _jwtOptions = jwtOptions.Value;
+
     public async Task<ApiResponse<RegisterUserResponseDto>> RegisterAccount(
         RegisterUserRequestDto registerUserRequestDto)
     {
@@ -128,9 +133,21 @@ public class AuthService(ILoggerAdapter<AuthService> logger, IBaseRepository<Use
                     Message = "Invalid credentials"
                 };
             }
+            
+            var accessToken = tokenService.GenerateAccessToken(user.Username);
+            var refreshToken = tokenService.GenerateRefreshToken();
 
-            //TODO: Generate a JWT token or perform any other necessary steps for successful login
+            var updateTokenResponse = await UpdateUserRefreshToken(user, refreshToken);
 
+            if (!updateTokenResponse)
+            {
+                return new ApiResponse<LoginResponseDto>
+                {
+                    ResponseCode = (int)HttpStatusCode.FailedDependency,
+                    Message = "Something bad happened and it is entirely our fault. Please try again."
+                };
+            }
+            
             return new ApiResponse<LoginResponseDto>
             {
                 ResponseCode = (int)HttpStatusCode.OK,
@@ -138,6 +155,8 @@ public class AuthService(ILoggerAdapter<AuthService> logger, IBaseRepository<Use
                 Data = new LoginResponseDto
                 {
                     Email = user.Email,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
                 }
             };
         }
@@ -152,4 +171,137 @@ public class AuthService(ILoggerAdapter<AuthService> logger, IBaseRepository<Use
         }
     }
 
+    public async Task<ApiResponse<TokenResponseDto>> RefreshToken(TokenRequestDto tokenRequestDto)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Generate new tokens for user -> Service: {service} -> Method: {method}. RequestPayload => {RequestPayload}",
+                nameof(AuthService),
+                nameof(RefreshToken),
+                JsonConvert.SerializeObject(tokenRequestDto)
+            );
+            
+            var principal = tokenService.GetPrincipalFromExpiredToken(tokenRequestDto.AccessToken);
+            if (!principal.Success)
+            {
+                return new ApiResponse<TokenResponseDto>
+                {
+                    ResponseCode = (int)HttpStatusCode.BadRequest,
+                    Message = principal.ErrorMessage ?? "Invalid access token or refresh token"
+                }; 
+            }
+            
+            var username = principal.Principal?.Identity?.Name;
+            
+            var user = await userRepository.FindOneAsync(u => u.Username == username);
+
+            if (user is null || user.RefreshToken != tokenRequestDto.RefreshToken ||
+                user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
+            {
+                return new ApiResponse<TokenResponseDto>
+                {
+                    ResponseCode = (int)HttpStatusCode.BadRequest,
+                    Message = "Invalid access token or refresh token"
+                };
+            }
+
+            var newAccessToken = tokenService.GenerateAccessToken(user.Username);
+            var newRefreshToken = tokenService.GenerateRefreshToken();
+            
+            var updateTokenResponse = await UpdateUserRefreshToken(user, newRefreshToken);
+
+            if (!updateTokenResponse)
+            {
+                return new ApiResponse<TokenResponseDto>
+                {
+                    ResponseCode = (int)HttpStatusCode.FailedDependency,
+                    Message = "Something bad happened and it is entirely our fault. Please try again."
+                };
+            }
+
+            return new ApiResponse<TokenResponseDto>
+            {
+                ResponseCode = (int)HttpStatusCode.OK,
+                Message = "New tokens generated successfully",
+                Data = new TokenResponseDto
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken
+                }
+            };
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Service: {service} --> Method: {method}. An error occurred.", nameof(AuthService), nameof(RefreshToken));
+            return new ApiResponse<TokenResponseDto>
+            {
+                ResponseCode = (int)HttpStatusCode.InternalServerError,
+                Message = "Oops! An error occurred while trying to get new tokens. Please try again later."
+            };
+        }
+    }
+
+    public async Task<ApiResponse<bool>> RevokeRefreshToken(string username)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Received request to revoke user refresh token -> Service: {service} -> Method: {method}. User => {username}",
+                nameof(AuthService),
+                nameof(RevokeRefreshToken),
+                username
+            );
+            
+            var user = await userRepository.FindOneAsync(u => u.Username == username);
+
+            if (user == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.BadRequest,
+                    Message = "Invalid user name"
+                };
+            }
+
+            user.RefreshToken = null;
+            var updateResponse = await userRepository.UpdateAsync(user);
+            if (updateResponse < 1)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.FailedDependency,
+                    Message = "Something bad happened and it is entirely our fault. Please try again."
+                };
+            }
+            
+            return new ApiResponse<bool>
+            {
+                ResponseCode = (int)HttpStatusCode.OK,
+                Message = "Refresh token revoked successfully."
+            };
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "[RevokeRefreshToken]: An error occurred.");
+            return new ApiResponse<bool>
+            {
+                ResponseCode = (int)HttpStatusCode.InternalServerError,
+                Message = "Oops! An error occurred while trying to revoke token. Please try again later."
+            };
+        }
+    }
+    
+
+    private async Task<bool> UpdateUserRefreshToken(User user, string newRefreshToken)
+    {
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenAddedAt = DateTimeOffset.UtcNow;
+        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddMinutes(_jwtOptions.RefreshTokenValidityPeriod);
+        user.LastLoginDate = DateTimeOffset.UtcNow; 
+            
+        var updateResponse = await userRepository.UpdateAsync(user);
+
+        return updateResponse >= 1;
+    }
 }

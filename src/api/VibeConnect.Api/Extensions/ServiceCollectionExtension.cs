@@ -1,9 +1,15 @@
 using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using VibeConnect.Api.Options;
+using VibeConnect.Auth.Module.Options;
 using VibeConnect.Auth.Module.Services;
 using VibeConnect.Shared.Models;
 using VibeConnect.Storage.Entities;
@@ -75,9 +81,7 @@ public static class ServiceCollectionExtension
         services.Configure<SwaggerDocsConfig>(c => configuration.GetSection(nameof(SwaggerDocsConfig)).Bind(c));
 
         services.ConfigureOptions<ConfigureSwaggerOptions>();
-
-        var projName = Assembly.GetExecutingAssembly().GetName().Name;
-
+        
         services.AddSwaggerGen(c =>
         {
             c.EnableAnnotations();
@@ -118,6 +122,54 @@ public static class ServiceCollectionExtension
 
         return services;
     }
+
+    private static readonly char[] Separator = { ' ' };
+
+    public static IServiceCollection AddBearerAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        Action<JwtConfig> bearerTokenConfigAction = bearerTokenConfig =>
+            configuration.GetSection(nameof(JwtConfig)).Bind(bearerTokenConfig);
+        var bearerConfig = new JwtConfig();
+        bearerTokenConfigAction.Invoke(bearerConfig);
+        services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async (ctx) =>
+                    {
+                        if (ctx.SecurityToken.ValidTo < DateTime.UtcNow)
+                        {
+                            ctx.Fail("Token has expired");
+                            return;
+                        }
+                        
+                        _ = ctx.HttpContext.Request.Headers.Authorization[0]?.Split(Separator)[1]!;
+                    }
+                };
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = bearerConfig.Issuer,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(bearerConfig.SigningKey)),
+                    ValidAudience = bearerConfig.Audience,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    RequireExpirationTime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+        return services;
+    }
     
     public static IServiceCollection AddBaseRepositories(this IServiceCollection services)
     {
@@ -128,6 +180,7 @@ public static class ServiceCollectionExtension
     
     public static IServiceCollection AddAuthModuleServiceCollection(this IServiceCollection services)
     {
+        services.AddTransient<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
        
         return services;
