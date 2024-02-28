@@ -17,7 +17,7 @@ jobs:
     # Service containers to run with `container-job`
     services:
       postgres:
-        image: postgres14
+        image: postgres:14
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
