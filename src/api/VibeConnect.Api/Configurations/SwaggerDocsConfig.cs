@@ -1,4 +1,4 @@
-namespace VibeConnect.Api.Options;
+namespace VibeConnect.Api.Configurations;
 
 public class SwaggerDocsConfig
 {

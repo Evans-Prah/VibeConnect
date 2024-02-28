@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using VibeConnect.Api.Options;
+using VibeConnect.Api.Configurations;
 using VibeConnect.Auth.Module.Options;
 using VibeConnect.Auth.Module.Services;
 using VibeConnect.Shared.Models;

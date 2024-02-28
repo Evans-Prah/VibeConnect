@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using VibeConnect.Api.Options;
+using VibeConnect.Api.Configurations;
 using VibeConnect.Storage;
 
 namespace VibeConnect.Api.Extensions;
