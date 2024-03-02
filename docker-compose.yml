@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine3.18
+    ports:
+      - "5432"
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: VibeConnect
+    networks:
+        - general-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on: 
+      - postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - general-network
+    environment:
+      DB_CONNECTION_STRING: "host=postgres;Port=5432;username=postgres;password=postgres;Database=VibeConnect;Pooling=true;CommandTimeout=120;Timeout=30"
+
+networks:
+  general-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
