@@ -27,4 +27,5 @@ COPY --from=publish /app/publish .
 # Start the application
 ENTRYPOINT ["dotnet", "VibeConnect.Api.dll"]
 
-
+# Metadata indicating the maintainer of the image
+LABEL maintainer="Evans Prah <ivanspj2@gmail.com>"
