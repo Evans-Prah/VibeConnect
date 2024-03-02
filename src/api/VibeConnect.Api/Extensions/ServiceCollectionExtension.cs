@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using VibeConnect.Api.Configurations;
 using VibeConnect.Auth.Module.Options;
 using VibeConnect.Auth.Module.Services;
+using VibeConnect.Profile.Module.Services;
 using VibeConnect.Shared.Models;
 using VibeConnect.Storage.Entities;
 using VibeConnect.Storage.Services;
@@ -150,7 +151,18 @@ public static class ServiceCollectionExtension
                             return;
                         }
                         
-                        _ = ctx.HttpContext.Request.Headers.Authorization[0]?.Split(Separator)[1]!;
+                        var bearerAuth = ctx.HttpContext.Request.Headers.Authorization[0]?.Split(Separator)[1]!;
+                        var username = ctx.Principal?.FindFirst(c => c.Type == ClaimTypes.Name)?.Value!;
+                        
+                        var claims = new List<Claim>
+                        {
+                            new(ClaimTypes.Authentication, bearerAuth)
+                        };
+                        
+                        var appIdentity = new ClaimsIdentity(claims, "VibeConnect");
+
+                        ctx.Principal?.AddIdentity(appIdentity);
+
                     }
                 };
                 x.SaveToken = true;
@@ -182,6 +194,13 @@ public static class ServiceCollectionExtension
     {
         services.AddTransient<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
+       
+        return services;
+    }
+    
+    public static IServiceCollection AddProfileModuleServiceCollection(this IServiceCollection services)
+    {
+        services.AddScoped<IProfileService, ProfileService>();
        
         return services;
     }

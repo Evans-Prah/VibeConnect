@@ -23,15 +23,15 @@ public class User
     public DateTimeOffset? LastLoginDate { get; set; }
     public string AccountStatus { get; set; }
     public string PrivacyLevel { get; set; }
-   
-    public List<LanguagePreference>? LanguagePreferences { get; set; }
+
+    public List<LanguagePreference>? LanguagePreferences { get; set; } = [];
     public int TotalPosts { get; set; }
     public int TotalFollowers { get; set; }
     public int TotalFollowing { get; set; }
     public DateTimeOffset LastActivityDate { get; set; } = DateTimeOffset.UtcNow;
     public bool IsVerified { get; set; }
     public bool IsSuspended { get; set; }
-    public List<ExternalLink>? ExternalLinks { get; set; }
+    public List<ExternalLink>? ExternalLinks { get; set; } = [];
     
     //public string NotificationPreferences { get; set; }
     //public string ThemePreferences { get; set; }

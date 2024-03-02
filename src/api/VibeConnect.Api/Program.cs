@@ -21,6 +21,7 @@ services.AddDbContextPool<ApplicationDbContext>(options =>
 
 services.AddBaseRepositories();
 services.AddAuthModuleServiceCollection();
+services.AddProfileModuleServiceCollection();
 
 services.Configure<JwtConfig>(c=> config.GetSection(nameof(JwtConfig)).Bind(c));
 
