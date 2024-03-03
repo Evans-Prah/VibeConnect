@@ -7,6 +7,9 @@ namespace VibeConnect.Storage;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<Post> Posts => Set<Post>();
+    public DbSet<PostLike> PostLikes => Set<PostLike>();
+    public DbSet<Comment> Comments => Set<Comment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

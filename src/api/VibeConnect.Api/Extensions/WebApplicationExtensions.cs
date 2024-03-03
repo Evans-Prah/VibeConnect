@@ -87,7 +87,7 @@ public static class WebApplicationExtensions
 
                 var submitMethods = Array.Empty<SubmitMethod>();
 
-                if (apiDocsConfig.EnableSwaggerTryIt && app.Environment.IsDevelopment())
+                if (apiDocsConfig.EnableSwaggerTryIt)
                 {
                     submitMethods = new SubmitMethod[]
                     {

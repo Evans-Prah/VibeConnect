@@ -81,5 +81,19 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             l.Property(lo => lo.Country).HasMaxLength(255);
         });
 
+        builder.HasMany(u => u.Posts)
+            .WithOne(p => p.User)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade); 
+        
+        builder.HasMany(u => u.PostLikes)
+            .WithOne(pl => pl.User)
+            .HasForeignKey(pl => pl.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.Comments)
+            .WithOne(c => c.User)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
