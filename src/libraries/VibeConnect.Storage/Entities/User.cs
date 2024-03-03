@@ -41,6 +41,25 @@ public class User
     public DateTimeOffset? RefreshTokenExpiryTime { get; set; }
 
     public Location? Location { get; set; } = new();
+    
+    
+    // Navigation Properties
+    
+    /// <summary>
+    /// Navigation property for posts created by the user
+    /// </summary>
+    public ICollection<Post> Posts { get; } = new List<Post>();
+
+    /// <summary>
+    /// Navigation property for user's post likes
+    /// </summary>
+    public ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
+
+    /// <summary>
+    /// Navigation property for user's comments
+    /// </summary>
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
 }
 
 public class ExternalLink
