@@ -73,6 +73,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             l.ToJson();
             l.Property(x => x.Language).HasMaxLength(150);
         });
-        
+
+        builder.OwnsOne(u => u.Location, l =>
+        {
+            l.ToJson();
+            l.Property(lo => lo.City).HasMaxLength(255);
+            l.Property(lo => lo.Country).HasMaxLength(255);
+        });
+
     }
 }
