@@ -8,4 +8,5 @@ public interface IProfileService
 {
     Task<ApiResponse<ProfileResponseDto>> GetUserProfile(string? username);
     Task<ApiResponse<ProfileResponseDto>> UpdateUserProfile(string? username, UpdateProfileRequestDto updateProfileRequestDto);
+    Task<ApiResponse<ProfileResponseDto>> UpdateUserLocation(string? username, UpdateLocationRequestDto updateLocationRequestDto);
 }

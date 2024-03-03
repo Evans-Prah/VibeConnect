@@ -44,7 +44,7 @@ public class ProfileController(IProfileService profileService) : BaseController
     /// </summary>
     /// <param name="payload">update user profile request payload</param>
     /// <returns>Updated user profile</returns>
-    [HttpPost]
+    [HttpPut]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ProfileResponseDto>))]
@@ -55,6 +55,25 @@ public class ProfileController(IProfileService profileService) : BaseController
     {
         var currentUser = User.GetCurrentUserAccount();
         var response = await profileService.UpdateUserProfile(currentUser?.Username, payload);
+        return ToActionResult(response);
+    }
+    
+    /// <summary>
+    /// User Location Update
+    /// </summary>
+    /// <param name="payload">update user location request payload</param>
+    /// <returns>Updated user location profile</returns>
+    [HttpPut("location")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ProfileResponseDto>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<ProfileResponseDto>))]
+    [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<ProfileResponseDto>))]
+    [SwaggerOperation(nameof(UpdateLocation), OperationId = nameof(UpdateLocation))]
+    public async Task<IActionResult> UpdateLocation([FromBody] UpdateLocationRequestDto payload)
+    {
+        var currentUser = User.GetCurrentUserAccount();
+        var response = await profileService.UpdateUserLocation(currentUser?.Username, payload);
         return ToActionResult(response);
     }
 }

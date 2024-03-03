@@ -26,5 +26,6 @@ public class ProfileResponseDto
     public DateTimeOffset LastActivityDate { get; set; }
     public bool IsVerified { get; set; }
     public List<ExternalLink>? ExternalLinks { get; set; }
+    public Location? Location { get; set; }
     
 }

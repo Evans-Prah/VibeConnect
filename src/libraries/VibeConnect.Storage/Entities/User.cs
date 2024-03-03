@@ -39,6 +39,8 @@ public class User
     public string? RefreshToken { get; set; }
     public DateTimeOffset? RefreshTokenAddedAt { get; set; }
     public DateTimeOffset? RefreshTokenExpiryTime { get; set; }
+
+    public Location? Location { get; set; } = new();
 }
 
 public class ExternalLink
@@ -63,4 +65,10 @@ public enum PrivacyLevel
 {
     Public = 0,
     Private = 1
+}
+
+public class Location
+{
+    public string? City { get; set; }
+    public string? Country { get; set; }
 }

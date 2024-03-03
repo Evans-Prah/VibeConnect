@@ -147,5 +147,66 @@ public class ProfileService(IBaseRepository<User> userRepository, ILoggerAdapter
         }
     }
     
-    
+    public async Task<ApiResponse<ProfileResponseDto>> UpdateUserLocation(string? username, UpdateLocationRequestDto updateLocationRequestDto)
+    {
+        try
+        {
+            logger.LogInformation(
+                "Update user location -> Service: {service} -> Method: {method}. User => {user}. Payload => {payload}",
+                nameof(ProfileService),
+                nameof(UpdateUserLocation),
+                username,
+                JsonConvert.SerializeObject(updateLocationRequestDto)
+            );
+
+            var user = await userRepository.FindOneAsync(u =>
+                u.Username == username && !u.IsSuspended && u.AccountStatus == "Active");
+
+            if (user == null)
+            {
+                return new ApiResponse<ProfileResponseDto>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "User does not exist, check username and try again",
+                };
+            }
+
+            user.Location ??= new Location();
+
+            user.Location.City = updateLocationRequestDto.City;
+            user.Location.Country = updateLocationRequestDto.Country;
+
+            user.LastActivityDate = DateTimeOffset.UtcNow;
+
+            var updateResponse = await userRepository.UpdateAsync(user);
+
+            if (updateResponse < 1)
+            {
+                return new ApiResponse<ProfileResponseDto>
+                {
+                    ResponseCode = (int)HttpStatusCode.FailedDependency,
+                    Message = "Something bad happened, and it is entirely our fault. Please try again."
+                };
+            }
+
+            var userProfileDto = user.Adapt<ProfileResponseDto>();
+
+            return new ApiResponse<ProfileResponseDto>
+            {
+                ResponseCode = (int)HttpStatusCode.OK,
+                Message = "Your location has been updated successfully",
+                Data = userProfileDto
+            };
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Service: {service} --> Method: {method}. An error occurred.", nameof(ProfileService), nameof(UpdateUserLocation));
+            return new ApiResponse<ProfileResponseDto>
+            {
+                ResponseCode = (int)HttpStatusCode.InternalServerError,
+                Message = "Oops! An error occurred while trying to update user location. Please try again later."
+            };
+        }
+    }
+
 }
