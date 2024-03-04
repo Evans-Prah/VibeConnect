@@ -11,6 +11,8 @@ using Newtonsoft.Json;
 using VibeConnect.Api.Configurations;
 using VibeConnect.Auth.Module.Options;
 using VibeConnect.Auth.Module.Services;
+using VibeConnect.Post.Module.Services.Cloudinary;
+using VibeConnect.Post.Module.Services.UploadService;
 using VibeConnect.Profile.Module.Services;
 using VibeConnect.Shared.Models;
 using VibeConnect.Storage.Entities;
@@ -205,5 +207,11 @@ public static class ServiceCollectionExtension
         return services;
     }
     
-    
+    public static IServiceCollection AddPostModuleServiceCollection(this IServiceCollection services)
+    {
+        services.AddScoped<ICloudinaryUploadService, CloudinaryUploadService>();
+        services.AddScoped<IUploadService, UploadService>();
+       
+        return services;
+    }
 }

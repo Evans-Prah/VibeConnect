@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using VibeConnect.Api.Extensions;
 using VibeConnect.Auth.Module.Options;
+using VibeConnect.Post.Module.Configurations;
 using VibeConnect.Shared;
 using VibeConnect.Storage;
 
@@ -22,8 +23,10 @@ services.AddDbContextPool<ApplicationDbContext>(options =>
 services.AddBaseRepositories();
 services.AddAuthModuleServiceCollection();
 services.AddProfileModuleServiceCollection();
+services.AddPostModuleServiceCollection();
 
 services.Configure<JwtConfig>(c=> config.GetSection(nameof(JwtConfig)).Bind(c));
+services.Configure<CloudinaryConfig>(c=> config.GetSection(nameof(CloudinaryConfig)).Bind(c));
 
 
 services.AddHealthChecks();

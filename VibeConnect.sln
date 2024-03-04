@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VibeConnect.Auth.Module", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VibeConnect.Profile.Module", "src\modules\VibeConnect.Profile.Module\VibeConnect.Profile.Module.csproj", "{EF88A830-2CA6-4EFF-9E51-EF35FBD96750}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VibeConnect.Post.Module", "src\modules\VibeConnect.Post.Module\VibeConnect.Post.Module.csproj", "{9ED983F1-A2E8-4813-A762-FFA655B001DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,7 @@ Global
 		{2E673852-63D2-4EFB-8A76-81716C79BED5} = {9CFB8E19-2A79-4006-98F0-4AA4A879B363}
 		{8B3D5A74-F653-44F3-90F8-A4CE64923CA7} = {F850B004-F527-4C4D-8CC0-0CAC2DD17314}
 		{EF88A830-2CA6-4EFF-9E51-EF35FBD96750} = {F850B004-F527-4C4D-8CC0-0CAC2DD17314}
+		{9ED983F1-A2E8-4813-A762-FFA655B001DD} = {F850B004-F527-4C4D-8CC0-0CAC2DD17314}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F073A894-6868-4162-9B0B-DC3636685B8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -56,5 +59,9 @@ Global
 		{EF88A830-2CA6-4EFF-9E51-EF35FBD96750}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF88A830-2CA6-4EFF-9E51-EF35FBD96750}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF88A830-2CA6-4EFF-9E51-EF35FBD96750}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9ED983F1-A2E8-4813-A762-FFA655B001DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ED983F1-A2E8-4813-A762-FFA655B001DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ED983F1-A2E8-4813-A762-FFA655B001DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ED983F1-A2E8-4813-A762-FFA655B001DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
