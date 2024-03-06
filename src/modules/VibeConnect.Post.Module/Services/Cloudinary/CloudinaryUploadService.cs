@@ -4,7 +4,7 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using VibeConnect.Post.Module.Configurations;
-using VibeConnect.Post.Module.Models.Cloudinary;
+using VibeConnect.Post.Module.DTOs.Cloudinary;
 using VibeConnect.Post.Module.Utilities;
 using VibeConnect.Shared.Models;
 

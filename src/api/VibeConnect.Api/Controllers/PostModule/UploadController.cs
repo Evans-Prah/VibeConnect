@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using VibeConnect.Api.Extensions;
-using VibeConnect.Post.Module.Models.Upload;
+using VibeConnect.Post.Module.DTOs.Upload;
 using VibeConnect.Post.Module.Services.UploadService;
 using VibeConnect.Profile.Module.DTOs.Request;
 using VibeConnect.Profile.Module.DTOs.Response;

@@ -12,6 +12,7 @@ using VibeConnect.Api.Configurations;
 using VibeConnect.Auth.Module.Options;
 using VibeConnect.Auth.Module.Services;
 using VibeConnect.Post.Module.Services.Cloudinary;
+using VibeConnect.Post.Module.Services.Post;
 using VibeConnect.Post.Module.Services.UploadService;
 using VibeConnect.Profile.Module.Services;
 using VibeConnect.Shared.Models;
@@ -188,6 +189,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddBaseRepositories(this IServiceCollection services)
     {
         services.AddScoped<IBaseRepository<User>, BaseRepository<User>>();
+        services.AddScoped<IBaseRepository<Storage.Entities.Post>, BaseRepository<Storage.Entities.Post>>();
        
         return services;
     }
@@ -211,6 +213,7 @@ public static class ServiceCollectionExtension
     {
         services.AddScoped<ICloudinaryUploadService, CloudinaryUploadService>();
         services.AddScoped<IUploadService, UploadService>();
+        services.AddScoped<IPostService, PostService>();
        
         return services;
     }
