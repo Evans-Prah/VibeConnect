@@ -1,6 +1,6 @@
-namespace VibeConnect.Post.Module.Models.Upload;
+namespace VibeConnect.Post.Module.DTOs.Cloudinary;
 
-public class UploadResponseDto 
+public class CloudinaryUploadResult
 {
     public string? SecureUrl { get; set; }
     public string? FileType { get; set; }

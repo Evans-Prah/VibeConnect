@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http;
-using VibeConnect.Post.Module.Models.Upload;
+using VibeConnect.Post.Module.DTOs.Upload;
 using VibeConnect.Shared.Models;
 
 namespace VibeConnect.Post.Module.Services.UploadService;

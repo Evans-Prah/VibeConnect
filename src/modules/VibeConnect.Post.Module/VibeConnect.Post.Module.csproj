@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="CloudinaryDotNet" Version="1.26.0" />
+      <PackageReference Include="Mapster" Version="7.4.0" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       
@@ -17,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\libraries\VibeConnect.Shared\VibeConnect.Shared.csproj" />
+      <ProjectReference Include="..\..\libraries\VibeConnect.Storage\VibeConnect.Storage.csproj" />
     </ItemGroup>
 
     <ItemGroup>

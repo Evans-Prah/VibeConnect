@@ -1,7 +1,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
-using VibeConnect.Post.Module.Models.Cloudinary;
-using VibeConnect.Post.Module.Models.Upload;
+using VibeConnect.Post.Module.DTOs.Upload;
 using VibeConnect.Post.Module.Services.Cloudinary;
 using VibeConnect.Post.Module.Utilities;
 using VibeConnect.Shared;
