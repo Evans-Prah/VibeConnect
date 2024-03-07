@@ -31,7 +31,7 @@ public class PostController(IPostService postService) : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<PostResponseDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<PostResponseDto>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<PostResponseDto>))]
-    [SwaggerOperation(nameof(CreatePost), OperationId = nameof(CreatePost))]
+    [SwaggerOperation("Create a post", OperationId = nameof(CreatePost))]
     public async Task<IActionResult> CreatePost([FromBody] PostRequestDto postRequestDto)
     {
         var currentUser = User.GetCurrentUserAccount();
@@ -49,7 +49,7 @@ public class PostController(IPostService postService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ApiPagedResult<PostResponseDto>>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<ApiPagedResult<PostResponseDto>>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<ApiPagedResult<PostResponseDto>>))]
-    [SwaggerOperation(nameof(GetCurrentUserPosts), OperationId = nameof(GetCurrentUserPosts))]
+    [SwaggerOperation("Get logged-in user posts", OperationId = nameof(GetCurrentUserPosts))]
     public async Task<IActionResult> GetCurrentUserPosts([FromQuery] BaseFilter baseFilter)
     {
         var currentUser = User.GetCurrentUserAccount();
@@ -67,7 +67,7 @@ public class PostController(IPostService postService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PostResponseDto>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<PostResponseDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<PostResponseDto>))]
-    [SwaggerOperation(nameof(GetCurrentUserPost), OperationId = nameof(GetCurrentUserPost))]
+    [SwaggerOperation("Get logged-in user post details", OperationId = nameof(GetCurrentUserPost))]
     public async Task<IActionResult> GetCurrentUserPost([FromRoute] string postId)
     {
         var currentUser = User.GetCurrentUserAccount();

@@ -31,7 +31,7 @@ public class ProfileController(IProfileService profileService) : BaseController
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApiResponse<ProfileResponseDto>))]
     [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ApiResponse<ProfileResponseDto>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<ProfileResponseDto>))]
-    [SwaggerOperation(nameof(GetCurrentUserProfile), OperationId = nameof(GetCurrentUserProfile))]
+    [SwaggerOperation("Get logged-in user profile", OperationId = nameof(GetCurrentUserProfile))]
     public async Task<IActionResult> GetCurrentUserProfile()
     {
         var currentUser = User.GetCurrentUserAccount();
@@ -50,7 +50,7 @@ public class ProfileController(IProfileService profileService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ProfileResponseDto>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<ProfileResponseDto>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<ProfileResponseDto>))]
-    [SwaggerOperation(nameof(UpdateProfile), OperationId = nameof(UpdateProfile))]
+    [SwaggerOperation("Update a user's profile", OperationId = nameof(UpdateProfile))]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequestDto payload)
     {
         var currentUser = User.GetCurrentUserAccount();
@@ -69,7 +69,7 @@ public class ProfileController(IProfileService profileService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ProfileResponseDto>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<ProfileResponseDto>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<ProfileResponseDto>))]
-    [SwaggerOperation(nameof(UpdateLocation), OperationId = nameof(UpdateLocation))]
+    [SwaggerOperation("Update a user's location", OperationId = nameof(UpdateLocation))]
     public async Task<IActionResult> UpdateLocation([FromBody] UpdateLocationRequestDto payload)
     {
         var currentUser = User.GetCurrentUserAccount();

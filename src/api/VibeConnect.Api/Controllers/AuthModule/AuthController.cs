@@ -27,7 +27,7 @@ public class AuthController(IAuthService authService) : BaseController
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApiResponse<RegisterUserResponseDto>))]
     [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ApiResponse<RegisterUserResponseDto>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<RegisterUserResponseDto>))]
-    [SwaggerOperation(nameof(RegisterAccount), OperationId = nameof(RegisterAccount))]
+    [SwaggerOperation("Register an account", OperationId = nameof(RegisterAccount))]
     public async Task<IActionResult> RegisterAccount([FromBody] RegisterUserRequestDto payload)
     {
         var response = await authService.RegisterAccount(payload);
@@ -45,7 +45,7 @@ public class AuthController(IAuthService authService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<LoginResponseDto>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<LoginResponseDto>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<LoginResponseDto>))]
-    [SwaggerOperation(nameof(Login), OperationId = nameof(Login))]
+    [SwaggerOperation("Login to the platform", OperationId = nameof(Login))]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto payload)
     {
         var response = await authService.Login(payload);

@@ -61,4 +61,10 @@ public class BaseRepository<T>(ApplicationDbContext dbContext) : IBaseRepository
 
     public IQueryable<T> GetQueryable() => _dbSet.AsNoTracking().AsQueryable();
     public IQueryable<T> GetFromSqlRaw(string sql, object[] parameters) => _dbSet.FromSqlRaw(sql, parameters);
+    
+    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.CountAsync(predicate);
+    }
+
 }
