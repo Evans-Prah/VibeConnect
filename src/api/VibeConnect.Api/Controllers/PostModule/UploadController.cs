@@ -33,7 +33,7 @@ public class UploadController(IUploadService uploadService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<UploadResponseDto>>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<List<UploadResponseDto>>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<List<UploadResponseDto>>))]
-    [SwaggerOperation(nameof(UploadMedia), OperationId = nameof(UploadMedia))]
+    [SwaggerOperation("Upload media for a user", OperationId = nameof(UploadMedia))]
     public async Task<IActionResult> UploadMedia([FromForm] List<IFormFile> files)
     {
         var currentUser = User.GetCurrentUserAccount();

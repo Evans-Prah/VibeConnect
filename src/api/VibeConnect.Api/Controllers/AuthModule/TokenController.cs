@@ -29,7 +29,7 @@ public class TokenController(IAuthService authService) : BaseController
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApiResponse<TokenResponseDto>))]
     [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ApiResponse<TokenResponseDto>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<TokenResponseDto>))]
-    [SwaggerOperation(nameof(Refresh), OperationId = nameof(Refresh))]
+    [SwaggerOperation("Request for refresh token", OperationId = nameof(Refresh))]
     public async Task<IActionResult> Refresh([FromBody] TokenRequestDto payload)
     {
         var response = await authService.RefreshToken(payload);
@@ -48,7 +48,7 @@ public class TokenController(IAuthService authService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<bool>))]
     [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<bool>))]
-    [SwaggerOperation(nameof(Revoke), OperationId = nameof(Revoke))]
+    [SwaggerOperation("Revoke user's refresh token", OperationId = nameof(Revoke))]
     public async Task<IActionResult> Revoke(string username)
     {
         var response = await authService.RevokeRefreshToken(username);

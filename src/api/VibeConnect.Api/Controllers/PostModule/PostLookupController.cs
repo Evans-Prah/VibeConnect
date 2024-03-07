@@ -31,7 +31,7 @@ public class PostLookupController(IPostService postService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ApiPagedResult<PostResponseDto>>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<ApiPagedResult<PostResponseDto>>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<ApiPagedResult<PostResponseDto>>))]
-    [SwaggerOperation(nameof(GetUserPosts), OperationId = nameof(GetUserPosts))]
+    [SwaggerOperation("Get all post for a user", OperationId = nameof(GetUserPosts))]
     public async Task<IActionResult> GetUserPosts([FromRoute] string username, [FromQuery] BaseFilter baseFilter)
     {
         var response = await postService.GetUserPosts(baseFilter, username);
@@ -50,7 +50,7 @@ public class PostLookupController(IPostService postService) : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PostResponseDto>))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<PostResponseDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<PostResponseDto>))]
-    [SwaggerOperation(nameof(GetUserPost), OperationId = nameof(GetUserPost))]
+    [SwaggerOperation("Get a user's post", OperationId = nameof(GetUserPost))]
     public async Task<IActionResult> GetUserPost([FromRoute] string username, [FromRoute] string postId)
     {
         var response = await postService.GetUserPost(postId, username);

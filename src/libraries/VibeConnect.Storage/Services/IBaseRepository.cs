@@ -15,4 +15,5 @@ public interface IBaseRepository<T>
     Task<int> DeleteAsync(T entity);
     IQueryable<T> GetQueryable();
     IQueryable<T> GetFromSqlRaw(string sql, object[] parameters);
+    Task<int> CountAsync(Expression<Func<T, bool>> predicate);
 }
