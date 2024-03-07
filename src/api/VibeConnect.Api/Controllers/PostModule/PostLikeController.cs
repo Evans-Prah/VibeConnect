@@ -61,4 +61,22 @@ public class PostLikeController(IPostLikeService postLikeService) : BaseControll
         return ToActionResult(response);
     }
     
+    /// <summary>
+    /// Get users who liked a post
+    /// </summary>
+    /// <param name="baseFilter">Filter posts parameters</param>
+    /// <param name="postId">PostId</param>
+    /// <returns>Users who liked a post</returns>
+    [HttpGet("users")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ApiPagedResult<UserLikedPostResponseDto>>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<ApiPagedResult<UserLikedPostResponseDto>>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<ApiPagedResult<UserLikedPostResponseDto>>))]
+    [SwaggerOperation("Get users who liked a post", OperationId = nameof(GetUsersWhoLikedPost))]
+    public async Task<IActionResult> GetUsersWhoLikedPost([FromRoute] string postId, [FromQuery] BaseFilter baseFilter)
+    {
+        var response = await postLikeService.GetUsersWhoLikedPost(postId, baseFilter);
+        return ToActionResult(response);
+    }
+    
 }

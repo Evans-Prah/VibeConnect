@@ -1,5 +1,8 @@
 using System.Net;
+using Microsoft.EntityFrameworkCore;
+using VibeConnect.Post.Module.DTOs.Post;
 using VibeConnect.Shared;
+using VibeConnect.Shared.Extensions;
 using VibeConnect.Shared.Models;
 using VibeConnect.Storage.Entities;
 using VibeConnect.Storage.Services;
@@ -117,6 +120,62 @@ public class PostLikeService(IBaseRepository<PostLike> postLikeRepository,
             };
         }
     }
+    
+    public async Task<ApiResponse<ApiPagedResult<UserLikedPostResponseDto>>> GetUsersWhoLikedPost(string postId, BaseFilter baseFilter)
+    {
+        try
+        {
+            logger.LogInformation("Get users who liked post {postId} -> Service: {service} -> Method: {method}.",
+                postId,
+                nameof(PostLikeService),
+                nameof(GetUsersWhoLikedPost)
+            );
+
+            var post = await postRepository.FindOneAsync(p => p.Id == postId);
+
+            if (post == null)
+            {
+                return new ApiResponse<ApiPagedResult<UserLikedPostResponseDto>>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "Sorry! Post does not exist, check and try again."
+                };
+            }
+
+            var query = postLikeRepository.GetQueryable()
+                .Where(pl => pl.PostId == postId)
+                .Include(pl => pl.User)
+                .Select(pl => new UserLikedPostResponseDto
+                {
+                    Id = pl.User.Id,
+                    Username = pl.User.Username,
+                    FullName = pl.User.FullName,
+                    Bio = pl.User.Bio
+                });
+
+            var pagedResult = await query.GetPaged(baseFilter.PageNumber, baseFilter.PageSize);
+
+            return new ApiResponse<ApiPagedResult<UserLikedPostResponseDto>>
+            {
+                ResponseCode = (int)HttpStatusCode.OK,
+                Message = "Users who liked the post fetched successfully",
+                Data = pagedResult
+            };
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while fetching users who liked post {postId} -> Service: {service} -> Method: {method}.",
+                postId,
+                nameof(PostLikeService), nameof(GetUsersWhoLikedPost));
+
+            return new ApiResponse<ApiPagedResult<UserLikedPostResponseDto>>
+            {
+                ResponseCode = (int)HttpStatusCode.InternalServerError,
+                Message = "Something bad happened while fetching users who liked the post, try again later."
+            };
+        }
+    }
+
 
     private static ApiResponse<int?>? ValidateInputs(string postId, string? username)
     {
