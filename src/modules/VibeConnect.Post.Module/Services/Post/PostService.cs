@@ -13,7 +13,8 @@ namespace VibeConnect.Post.Module.Services.Post;
 public class PostService(
     IBaseRepository<Storage.Entities.Post> postRepository,
     ILoggerAdapter<PostService> logger,
-    IBaseRepository<User> userRepository) : IPostService
+    IBaseRepository<User> userRepository,
+    IBaseRepository<PostLike> postLikeRepository) : IPostService
 {
 
     public async Task<ApiResponse<PostResponseDto>> CreatePost(string? username, PostRequestDto postRequestDto)
@@ -107,11 +108,20 @@ public class PostService(
             var pagedResult = await query.OrderByDescending(p => p.CreatedAt)
                 .GetPaged(baseFilter.PageNumber, baseFilter.PageSize);
 
-            var posts = pagedResult.Results.Select(p => p.Adapt<PostResponseDto>()).ToList();
+            var postDtos = new List<PostResponseDto>();
+
+            foreach (var post in pagedResult.Results)
+            {
+                var postDto = post.Adapt<PostResponseDto>();
+                var postLikeCount = await postLikeRepository.CountAsync(pl => pl.PostId == post.Id);
+                postDto.LikeCount = postLikeCount;
+                postDtos.Add(postDto);
+            }
+
 
             var response = new ApiPagedResult<PostResponseDto>
             {
-                Results = posts,
+                Results = postDtos,
                 UpperBound = pagedResult.UpperBound,
                 LowerBound = pagedResult.LowerBound,
                 PageIndex = pagedResult.PageIndex,
@@ -176,6 +186,8 @@ public class PostService(
             }
 
             var postDto = post.Adapt<PostResponseDto>();
+            var postLikeCount = await postLikeRepository.CountAsync(pl => pl.PostId == postId);
+            postDto.LikeCount = postLikeCount;
 
             return new ApiResponse<PostResponseDto>
             {

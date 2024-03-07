@@ -11,4 +11,5 @@ public class PostResponseDto
     public string Location { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
+    public int LikeCount { get; set; }
 }
