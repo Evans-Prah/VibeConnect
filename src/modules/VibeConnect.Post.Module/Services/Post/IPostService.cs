@@ -8,4 +8,6 @@ public interface IPostService
     Task<ApiResponse<PostResponseDto>> CreatePost(string? username, PostRequestDto postRequestDto);
     Task<ApiResponse<ApiPagedResult<PostResponseDto>>> GetUserPosts(BaseFilter baseFilter, string? username = null);
     Task<ApiResponse<PostResponseDto>> GetUserPost(string postId, string? username = null);
+    Task<ApiResponse<PostResponseDto>> UpdatePost(string? username, string postId, PostRequestDto postRequestDto);
+    Task<ApiResponse<bool>> DeletePost(string? username, string postId);
 }

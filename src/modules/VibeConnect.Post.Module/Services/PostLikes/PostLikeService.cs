@@ -150,7 +150,8 @@ public class PostLikeService(IBaseRepository<PostLike> postLikeRepository,
                     Id = pl.User.Id,
                     Username = pl.User.Username,
                     FullName = pl.User.FullName,
-                    Bio = pl.User.Bio
+                    Bio = pl.User.Bio,
+                    ProfilePictureUrl = pl.User.ProfilePictureUrl
                 });
 
             var pagedResult = await query.GetPaged(baseFilter.PageNumber, baseFilter.PageSize);
