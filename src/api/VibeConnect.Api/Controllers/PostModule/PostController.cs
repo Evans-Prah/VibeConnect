@@ -75,4 +75,44 @@ public class PostController(IPostService postService) : BaseController
         return ToActionResult(response);
     } 
     
+    /// <summary>
+    /// Update user's post
+    /// </summary>
+    /// <param name="postId">Post Id</param>
+    /// <param name="postRequestDto">update post payload</param>
+    /// <returns>Updated post</returns>
+    [HttpPut("{postId}")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApiResponse<PostResponseDto>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<PostResponseDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<PostResponseDto>))]
+    [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<PostResponseDto>))]
+    [SwaggerOperation("Update a post", OperationId = nameof(UpdatePost))]
+    public async Task<IActionResult> UpdatePost([FromRoute] string postId, [FromBody] PostRequestDto postRequestDto)
+    {
+        var currentUser = User.GetCurrentUserAccount();
+        var response = await postService.UpdatePost(currentUser?.Username, postId, postRequestDto);
+        return ToActionResult(response);
+    } 
+    
+    /// <summary>
+    /// Delete user's post
+    /// </summary>
+    /// <param name="postId">Post Id</param>
+    /// <returns></returns>
+    [HttpDelete("{postId}")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApiResponse<bool>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<bool>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<bool>))]
+    [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<bool>))]
+    [SwaggerOperation("Delete a post", OperationId = nameof(DeletePost))]
+    public async Task<IActionResult> DeletePost([FromRoute] string postId)
+    {
+        var currentUser = User.GetCurrentUserAccount();
+        var response = await postService.DeletePost(currentUser?.Username, postId);
+        return ToActionResult(response);
+    } 
 }
