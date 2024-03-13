@@ -17,15 +17,15 @@ public class PostLike
     /// <summary>
     /// Navigation property for the liked post
     /// </summary>
-    public Post Post { get; set; }
+    public virtual Post Post { get; set; }
     
     /// <summary>
     /// Navigation property for the liked comment
     /// </summary>
-    public Comment Comment { get; set; }
+    public virtual Comment Comment { get; set; }
     
     /// <summary>
     /// Navigation property for the user who made the like
     /// </summary>
-    public User User { get; set; } 
+    public virtual User User { get; set; } 
 }

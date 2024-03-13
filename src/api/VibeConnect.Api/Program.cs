@@ -17,8 +17,10 @@ var config = builder.Configuration;
 // Add services to the container.
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? config.GetConnectionString("DbConnection");
 
-services.AddDbContextPool<ApplicationDbContext>(options => 
-    options.UseNpgsql(connectionString));
+services.AddDbContextPool<ApplicationDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
+});
 
 services.AddBaseRepositories();
 services.AddAuthModuleServiceCollection();
