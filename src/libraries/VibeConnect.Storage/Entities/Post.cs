@@ -18,17 +18,17 @@ public class Post
     /// <summary>
     /// Navigation property for the user who created the post
     /// </summary>
-    public User User { get; set; } 
+    public virtual User User { get; set; } 
     
     /// <summary>
     /// // Navigation property for post likes
     /// </summary>
-    public ICollection<PostLike> PostLikes { get; set; } 
+    public virtual ICollection<PostLike> PostLikes { get; set; } 
     
     /// <summary>
     /// Navigation property for comments on the post
     /// </summary>
-    public ICollection<Comment> Comments { get; set; } 
+    public virtual ICollection<Comment> Comments { get; set; } 
 }
 
 public class MediaContent
