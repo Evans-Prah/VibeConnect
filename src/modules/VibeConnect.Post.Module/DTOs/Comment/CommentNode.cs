@@ -8,4 +8,6 @@ public class CommentNode
     public string? ProfilePictureUrl { get; set; }
     public string? Content { get; set; }
     public List<CommentNode> Replies { get; set; } = [];
+    public int LikeCount { get; set; }
+
 }
