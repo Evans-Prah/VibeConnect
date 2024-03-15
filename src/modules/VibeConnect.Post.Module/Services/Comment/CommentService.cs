@@ -11,7 +11,8 @@ using VibeConnect.Storage.Services;
 namespace VibeConnect.Post.Module.Services.Comment;
 
 public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRepository, IBaseRepository<Storage.Entities.Post> postRepository,
-    IBaseRepository<User> userRepository, ILoggerAdapter<CommentService> logger) : ICommentService
+    IBaseRepository<User> userRepository, ILoggerAdapter<CommentService> logger,
+    IBaseRepository<PostLike> postLikeRepository) : ICommentService
 {
     public async Task<ApiResponse<CommentResponseDto>> AddComment(string? username, CommentRequestDto commentRequestDto)
     {
@@ -123,6 +124,12 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
                 .Where(c => c.ParentCommentId == null)
                 .Select(c => commentDict[c.Id])
                 .ToList();
+
+            foreach (var commentNode in commentDict.Values)
+            {
+                var likeCount = await postLikeRepository.CountAsync(cl => cl.CommentId == commentNode.CommentId);
+                commentNode.LikeCount = likeCount;
+            }
             
             return new ApiResponse<List<CommentNode>>
             {
@@ -213,6 +220,9 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
                 }
             }
 
+            var commentLikeCount = await postLikeRepository.CountAsync(pl => pl.CommentId == commentId);
+            commentNode.LikeCount = commentLikeCount;
+            
             return new ApiResponse<CommentNode>
             {
                 ResponseCode = (int)HttpStatusCode.OK,

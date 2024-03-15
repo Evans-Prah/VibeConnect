@@ -220,6 +220,7 @@ public static class ServiceCollectionExtension
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<IPostLikeService, PostLikeService>();
         services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<ICommentLikeService, CommentLikeService>();
        
         return services;
     }
