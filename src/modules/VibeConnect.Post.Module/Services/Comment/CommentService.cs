@@ -334,32 +334,6 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
         }
     }
 
-    // private async Task<List<Storage.Entities.Comment>> GetAllCommentsForPost(string postId, int pageNumber, int pageSize)
-    // {
-    //     var post = await postRepository.GetByIdAsync(postId);
-    //
-    //     if (post == null)
-    //     {
-    //         return [];
-    //     }
-    //     //var query = postRepository.GetQueryable().AsNoTracking().Where(p => p.UserId == user.Id);
-    //
-    //
-    //
-    //
-    //     var queryable =  commentRepository.GetQueryable()
-    //         .Include(c => c.User)
-    //         .Include(c => c.Replies)
-    //         .Include(c => c.ParentComment)
-    //         .Where(c => c.PostId == postId);
-    //     
-    //     var comments = await queryable.OrderByDescending(p => p.CreatedAt)
-    //         .GetPaged(pageNumber, pageSize);
-    //
-    //
-    //     return comments;
-    // }
-
     private async Task<Storage.Entities.Comment?> GetCommentById(string commentId)
     {
         var comment = await commentRepository.GetQueryable()
