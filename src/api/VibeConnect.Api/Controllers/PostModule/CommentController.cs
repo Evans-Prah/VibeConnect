@@ -43,16 +43,17 @@ public class CommentController(ICommentService commentService) : BaseController
     /// Get comments/replies on post
     /// </summary>
     /// <param name="postId">Post Id</param>
+    /// <param name="baseFilter">Filter</param>
     /// <returns>All comments and replies on post</returns>
     [HttpGet("all/{postId}")]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<CommentNode>>))]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<List<CommentNode>>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<List<CommentNode>>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ApiPagedResult<CommentNode>>))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ApiResponse<ApiPagedResult<CommentNode>>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<ApiPagedResult<CommentNode>>))]
     [SwaggerOperation("Get comments/replies on post", OperationId = nameof(GetPostComments))]
-    public async Task<IActionResult> GetPostComments([FromRoute] string postId)
+    public async Task<IActionResult> GetPostComments([FromRoute] string postId, [FromQuery] BaseFilter baseFilter)
     {
-        var response = await commentService.GetPostComments(postId);
+        var response = await commentService.GetPostComments(postId, baseFilter);
         return ToActionResult(response);
     }
     
