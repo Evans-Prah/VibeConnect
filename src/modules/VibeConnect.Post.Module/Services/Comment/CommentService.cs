@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using VibeConnect.Post.Module.DTOs.Comment;
 using VibeConnect.Shared;
+using VibeConnect.Shared.Extensions;
 using VibeConnect.Shared.Models;
 using VibeConnect.Storage.Entities;
 using VibeConnect.Storage.Services;
@@ -97,13 +98,31 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
         }
     }
     
-    public async Task<ApiResponse<List<CommentNode>>> GetPostComments(string postId)
+    public async Task<ApiResponse<ApiPagedResult<CommentNode>>> GetPostComments(string postId, BaseFilter baseFilter)
     {
         try
         {
-            var comments = await GetAllCommentsForPost(postId);
+            var post = await postRepository.GetByIdAsync(postId);
+
+            if (post == null)
+            {
+                return new ApiResponse<ApiPagedResult<CommentNode>>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "Post does not exist, check and try again."
+                };
+            }
+
+            var queryable =  commentRepository.GetQueryable()
+                .Include(c => c.User)
+                .Include(c => c.Replies)
+                .Include(c => c.ParentComment)
+                .Where(c => c.PostId == postId);
+        
+            var comments = await queryable.OrderByDescending(p => p.CreatedAt)
+                .GetPaged(baseFilter.PageNumber, baseFilter.PageSize);
             
-            var commentDict = comments.ToDictionary(c => c.Id, c => new CommentNode
+            var commentDict = comments.Results.ToDictionary(c => c.Id, c => new CommentNode
             {
                 CommentId = c.Id,
                 UserId = c.UserId,
@@ -112,7 +131,7 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
                 Content = c.Content
             });
 
-            foreach (var comment in comments)
+            foreach (var comment in comments.Results)
             {
                 if (comment.ParentCommentId != null && commentDict.TryGetValue(comment.ParentCommentId, out var parent))
                 {
@@ -120,10 +139,11 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
                 }
             }
 
-            var rootComments = comments
+            var rootComments = comments.Results
                 .Where(c => c.ParentCommentId == null)
                 .Select(c => commentDict[c.Id])
                 .ToList();
+
 
             foreach (var commentNode in commentDict.Values)
             {
@@ -131,11 +151,22 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
                 commentNode.LikeCount = likeCount;
             }
             
-            return new ApiResponse<List<CommentNode>>
+            var response = new ApiPagedResult<CommentNode>
+            {
+                Results = rootComments,
+                UpperBound = comments.UpperBound,
+                LowerBound = comments.LowerBound,
+                PageIndex = comments.PageIndex,
+                PageSize = comments.PageSize,
+                TotalCount = comments.TotalCount,
+                TotalPages = comments.TotalPages
+            };
+
+            return new ApiResponse<ApiPagedResult<CommentNode>>
             {
                 ResponseCode = (int)HttpStatusCode.OK,
                 Message = "Comments fetched successfully",
-                Data = rootComments,
+                Data = response,
             };
         }
         catch (Exception e)
@@ -144,7 +175,7 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
                 postId,
                 nameof(CommentService), nameof(GetPostComments));
 
-            return new ApiResponse<List<CommentNode>>
+            return new ApiResponse<ApiPagedResult<CommentNode>>
             {
                 ResponseCode = (int)HttpStatusCode.InternalServerError,
                 Message = "Something bad happened while fetching comments, try again later."
@@ -303,24 +334,31 @@ public class CommentService(IBaseRepository<Storage.Entities.Comment> commentRep
         }
     }
 
-    private async Task<List<Storage.Entities.Comment>> GetAllCommentsForPost(string postId)
-    {
-        var post = await postRepository.GetByIdAsync(postId);
-
-        if (post == null)
-        {
-            return [];
-        }
-
-        var comments = await commentRepository.GetQueryable()
-            .Include(c => c.User)
-            .Include(c => c.Replies)
-            .Include(c => c.ParentComment) 
-            .Where(c => c.PostId == postId)
-            .ToListAsync();
-
-        return comments;
-    }
+    // private async Task<List<Storage.Entities.Comment>> GetAllCommentsForPost(string postId, int pageNumber, int pageSize)
+    // {
+    //     var post = await postRepository.GetByIdAsync(postId);
+    //
+    //     if (post == null)
+    //     {
+    //         return [];
+    //     }
+    //     //var query = postRepository.GetQueryable().AsNoTracking().Where(p => p.UserId == user.Id);
+    //
+    //
+    //
+    //
+    //     var queryable =  commentRepository.GetQueryable()
+    //         .Include(c => c.User)
+    //         .Include(c => c.Replies)
+    //         .Include(c => c.ParentComment)
+    //         .Where(c => c.PostId == postId);
+    //     
+    //     var comments = await queryable.OrderByDescending(p => p.CreatedAt)
+    //         .GetPaged(pageNumber, pageSize);
+    //
+    //
+    //     return comments;
+    // }
 
     private async Task<Storage.Entities.Comment?> GetCommentById(string commentId)
     {
