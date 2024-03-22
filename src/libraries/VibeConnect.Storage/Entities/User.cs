@@ -59,6 +59,28 @@ public class User
     /// Navigation property for user's comments
     /// </summary>
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    
+    /// <summary>
+    /// Navigation property for user's sent friendship requests
+    /// </summary>
+    
+    public ICollection<FriendshipRequest> SentFriendshipRequests { get; set; }
+    
+    /// <summary>
+    /// Navigation property for user's received friendship requests
+    /// </summary>
+    
+    public ICollection<FriendshipRequest> ReceivedFriendshipRequests { get; set; }
+    
+    /// <summary>
+    /// Navigation property for user's followers
+    /// </summary>
+    public ICollection<Friendship> Followers { get; set; }
+    
+    /// <summary>
+    /// Navigation property for user's followings
+    /// </summary>
+    public ICollection<Friendship> Followings { get; set; }
 
 }
 

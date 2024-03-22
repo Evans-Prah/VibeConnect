@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VibeConnect.Storage;
@@ -11,9 +12,11 @@ using VibeConnect.Storage;
 namespace VibeConnect.Storage.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240320155755_Friendship")]
+    partial class Friendship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,31 +83,6 @@ namespace VibeConnect.Storage.Migrations
                         .IsUnique();
 
                     b.ToTable("Friendships");
-                });
-
-            modelBuilder.Entity("VibeConnect.Storage.Entities.FriendshipRequest", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ReceiverId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("RequestedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("FriendshipRequests");
                 });
 
             modelBuilder.Entity("VibeConnect.Storage.Entities.Post", b =>
@@ -321,25 +299,6 @@ namespace VibeConnect.Storage.Migrations
                     b.Navigation("Following");
                 });
 
-            modelBuilder.Entity("VibeConnect.Storage.Entities.FriendshipRequest", b =>
-                {
-                    b.HasOne("VibeConnect.Storage.Entities.User", "Receiver")
-                        .WithMany("ReceivedFriendshipRequests")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("VibeConnect.Storage.Entities.User", "Sender")
-                        .WithMany("SentFriendshipRequests")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
             modelBuilder.Entity("VibeConnect.Storage.Entities.Post", b =>
                 {
                     b.HasOne("VibeConnect.Storage.Entities.User", "User")
@@ -513,10 +472,6 @@ namespace VibeConnect.Storage.Migrations
                     b.Navigation("PostLikes");
 
                     b.Navigation("Posts");
-
-                    b.Navigation("ReceivedFriendshipRequests");
-
-                    b.Navigation("SentFriendshipRequests");
                 });
 #pragma warning restore 612, 618
         }
