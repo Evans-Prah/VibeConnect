@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using VibeConnect.Api.Configurations;
 using VibeConnect.Auth.Module.Options;
 using VibeConnect.Auth.Module.Services;
+using VibeConnect.Friendship.Module.Services;
 using VibeConnect.Post.Module.Services.Cloudinary;
 using VibeConnect.Post.Module.Services.Comment;
 using VibeConnect.Post.Module.Services.Post;
@@ -194,7 +195,8 @@ public static class ServiceCollectionExtension
         services.AddScoped<IBaseRepository<Storage.Entities.Post>, BaseRepository<Storage.Entities.Post>>();
         services.AddScoped<IBaseRepository<PostLike>, BaseRepository<PostLike>>();
         services.AddScoped<IBaseRepository<Comment>, BaseRepository<Comment>>();
-       
+        services.AddScoped<IBaseRepository<FriendshipRequest>, BaseRepository<FriendshipRequest>>();
+        services.AddScoped<IBaseRepository<Storage.Entities.Friendship>, BaseRepository<Storage.Entities.Friendship>>();       
         return services;
     }
     
@@ -221,6 +223,13 @@ public static class ServiceCollectionExtension
         services.AddScoped<IPostLikeService, PostLikeService>();
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<ICommentLikeService, CommentLikeService>();
+       
+        return services;
+    }
+    
+    public static IServiceCollection AddFriendshipModuleServiceCollection(this IServiceCollection services)
+    {
+        services.AddScoped<IFriendRequestService, FriendRequestService>();
        
         return services;
     }
