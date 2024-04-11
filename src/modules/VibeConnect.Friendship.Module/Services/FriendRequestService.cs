@@ -291,7 +291,8 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
             var friend = new Storage.Entities.Friendship
             {
                 FollowerId = request.SenderId,
-                FollowingId = user.Id
+                FollowingId = user.Id,
+                IsMutual = true
             };
             
             var addFriend = await friendshipRepository.AddAsync(friend);
@@ -375,6 +376,23 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
                     ResponseCode = (int)HttpStatusCode.Forbidden,
                     Message = "You cannot reject your own friend request",
                     Data = false
+                };
+            }
+            
+            var friendship = new Storage.Entities.Friendship
+            {
+                FollowerId = request.SenderId,
+                FollowingId = user.Id,
+                IsMutual = false
+            };
+        
+            var addFriendship = await friendshipRepository.AddAsync(friendship);
+            if (addFriendship < 1)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.FailedDependency,
+                    Message = "Something bad happened when rejecting friend requests"
                 };
             }
             
