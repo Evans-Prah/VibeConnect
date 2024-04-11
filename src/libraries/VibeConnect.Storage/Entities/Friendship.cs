@@ -6,7 +6,7 @@ public class Friendship
     public required string FollowerId { get; set; } 
     public required string FollowingId { get; set; }
     public DateTimeOffset FollowedAt { get; set; } = DateTimeOffset.UtcNow;
-
+    public bool IsMutual { get; set; }
     /// <summary>
     /// Navigation property for the user/users who have followed the current logged-in user
     /// </summary>
