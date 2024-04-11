@@ -45,6 +45,7 @@
       <ProjectReference Include="..\..\libraries\VibeConnect.Shared\VibeConnect.Shared.csproj" />
       <ProjectReference Include="..\..\libraries\VibeConnect.Storage\VibeConnect.Storage.csproj" />
       <ProjectReference Include="..\..\modules\VibeConnect.Auth.Module\VibeConnect.Auth.Module.csproj" />
+      <ProjectReference Include="..\..\modules\VibeConnect.Friendship.Module\VibeConnect.Friendship.Module.csproj" />
       <ProjectReference Include="..\..\modules\VibeConnect.Post.Module\VibeConnect.Post.Module.csproj" />
       <ProjectReference Include="..\..\modules\VibeConnect.Profile.Module\VibeConnect.Profile.Module.csproj" />
     </ItemGroup>
