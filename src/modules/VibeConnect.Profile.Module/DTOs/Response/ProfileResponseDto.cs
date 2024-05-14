@@ -27,5 +27,4 @@ public class ProfileResponseDto
     public bool IsVerified { get; set; }
     public List<ExternalLink>? ExternalLinks { get; set; }
     public Location? Location { get; set; }
-    
 }

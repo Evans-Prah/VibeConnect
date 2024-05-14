@@ -230,6 +230,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddFriendshipModuleServiceCollection(this IServiceCollection services)
     {
         services.AddScoped<IFriendRequestService, FriendRequestService>();
+        services.AddScoped<IFriendshipService, FriendshipService>();
        
         return services;
     }
