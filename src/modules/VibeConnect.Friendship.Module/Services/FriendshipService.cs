@@ -30,17 +30,6 @@ public class FriendshipService(IBaseRepository<Storage.Entities.Friendship> frie
                 .AsNoTracking()
                 .Where(f => f.FollowingId == user.Id);
             
-            // var queryable = friendshipRepository
-            //     .GetQueryable()
-            //     .AsNoTracking()
-            //     .Join(friendshipRepository.GetQueryable(), // Join with Friendship table itself
-            //         f => f.FollowingId,
-            //         f2 => f2.FollowerId,
-            //         (f, f2) => new { f.FollowingId, f2.FollowerId, f.FollowedAt, f.IsMutual })
-            //     .Where(joined => joined.FollowerId == user.Id); // Filter by user being followed (John)
-
-           
-
             var followers = await queryable
                 .OrderByDescending(f => f.FollowedAt)
                 .GetPaged(baseFilter.PageNumber, baseFilter.PageSize);
@@ -163,6 +152,185 @@ public class FriendshipService(IBaseRepository<Storage.Entities.Friendship> frie
             {
                 ResponseCode = (int)HttpStatusCode.InternalServerError,
                 Message = "Something bad happened when fetching user followings"
+            };
+        }
+    }
+    
+    public async Task<ApiResponse<bool>> UnfollowUserTransaction(string username, string followingUsername)
+    {
+        try
+        {
+            var user = await userRepository.FindOneAsync(u => u.Username == username);
+            if (user == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "User not found, check and try again"
+                };
+            }
+
+            var followingUser = await userRepository.FindOneAsync(u => u.Username == followingUsername);
+            if (followingUser == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "Following user not found, check and try again"
+                };
+            }
+
+            var friendship = await friendshipRepository.FindOneAsync(f =>
+                f.FollowerId == user.Id && f.FollowingId == followingUser.Id);
+
+            if (friendship == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "Friendship not found, check and try again"
+                };
+            }
+
+            await friendshipRepository.BeginTransactionAsync();
+            try
+            {
+                var deleteFriendship = await friendshipRepository.DeleteAsync(friendship);
+                if (deleteFriendship < 1)
+                {
+                    return new ApiResponse<bool>
+                    {
+                        ResponseCode = (int)HttpStatusCode.FailedDependency,
+                        Message = $"Could not unfollow {followingUsername}, please try again"
+                    };
+                }
+                
+
+                user.TotalFollowing--;
+                followingUser.TotalFollowers--;
+
+                var updateUserResult = await userRepository.UpdateAsync(user);
+                var updateFollowingUserResult = await userRepository.UpdateAsync(followingUser);
+
+                if (updateUserResult < 1 || updateFollowingUserResult < 1)
+                {
+                    // Rollback the transaction if any update fails
+                    await friendshipRepository.RollbackTransactionAsync(); 
+
+                    return new ApiResponse<bool>
+                    {
+                        ResponseCode = (int)HttpStatusCode.FailedDependency,
+                        Message = "Failed to update user data, please try again"
+                    };
+                }
+
+                // Commit the transaction if all operations succeed
+                await friendshipRepository.CommitTransactionAsync();
+
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.OK,
+                    Message = "User unfollowed successfully",
+                    Data = true
+                };
+            }
+            catch (Exception ex)
+            {
+                // Rollback the transaction in case of any exception
+                await friendshipRepository.RollbackTransactionAsync();
+
+                logger.LogError(ex, "An error occurred while unfollowing user -> Service: {service} -> Method: {method}.",
+                    nameof(FriendshipService), nameof(UnfollowUserTransaction));
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something bad happened when unfollowing user"
+                };
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while unfollowing user -> Service: {service} -> Method: {method}.",
+                nameof(FriendshipService), nameof(UnfollowUserTransaction));
+            return new ApiResponse<bool>
+            {
+                ResponseCode = (int)HttpStatusCode.InternalServerError,
+                Message = "Something bad happened when unfollowing user"
+            };
+        }
+    }
+    
+    
+    public async Task<ApiResponse<bool>> UnfollowUser(string username, string followingUsername)
+    {
+        try
+        {
+            var user = await userRepository.FindOneAsync(u => u.Username == username);
+            if (user == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "User not found, check and try again"
+                };
+            }
+            
+
+            var followingUser = await userRepository.FindOneAsync(u => u.Username == followingUsername);
+            if (followingUser == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "Following user not found, check and try again"
+                };
+            }
+
+            var friendship = await friendshipRepository.FindOneAsync(f =>
+                f.FollowerId == user.Id && f.FollowingId == followingUser.Id);
+
+            if (friendship == null)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.NotFound,
+                    Message = "Friendship not found, check and try again"
+                };
+            }
+
+            var deleteFriendship = await friendshipRepository.DeleteAsync(friendship);
+            if (deleteFriendship < 1)
+            {
+                return new ApiResponse<bool>
+                {
+                    ResponseCode = (int)HttpStatusCode.FailedDependency,
+                    Message = $"Could not unfollow {followingUsername}, please try again"
+                };
+            }
+            
+            
+
+            // Update TotalFollowings for the user who initiated the unfollow
+            user.TotalFollowing--;
+            followingUser.TotalFollowers--;
+            await userRepository.UpdateAsync(user);
+            await userRepository.UpdateAsync(followingUser);
+
+            return new ApiResponse<bool>
+            {
+                ResponseCode = (int)HttpStatusCode.OK,
+                Message = "User unfollowed successfully",
+                Data = true
+            };
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while unfollowing user -> Service: {service} -> Method: {method}.",
+                nameof(FriendshipService), nameof(UnfollowUser));
+            return new ApiResponse<bool>
+            {
+                ResponseCode = (int)HttpStatusCode.InternalServerError,
+                Message = "Something bad happened when unfollowing user"
             };
         }
     }
