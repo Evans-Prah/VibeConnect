@@ -331,7 +331,6 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
             var existingFriendship = await friendshipRepository
                 .FindOneAsync(f => (f.FollowerId == request.SenderId && f.FollowingId == user.Id));
             
-            // If no existing friendship is found, return immediately
             if (existingFriendship == null)
             {
                 return new ApiResponse<bool>
@@ -341,11 +340,9 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
                 };
             }
 
-            // Update the existing friendship record to set IsMutual to true
             existingFriendship.IsMutual = true;
             await friendshipRepository.UpdateAsync(existingFriendship);
 
-            // Create a new friendship record for the receiver
             var newFriendshipReceiver = new Storage.Entities.Friendship
             {
                 FollowerId = user.Id,
@@ -355,7 +352,6 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
 
             await friendshipRepository.AddAsync(newFriendshipReceiver);
 
-            // Update the TotalFollowers and TotalFollowing properties of both users 
             var senderUser = await userRepository.GetByIdAsync(request.SenderId);
             if (senderUser != null)
             {
