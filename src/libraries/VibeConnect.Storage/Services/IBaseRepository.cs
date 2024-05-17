@@ -16,4 +16,7 @@ public interface IBaseRepository<T>
     IQueryable<T> GetQueryable();
     IQueryable<T> GetFromSqlRaw(string sql, object[] parameters);
     Task<int> CountAsync(Expression<Func<T, bool>> predicate);
+    Task BeginTransactionAsync();
+    Task CommitTransactionAsync();
+    Task RollbackTransactionAsync();
 }

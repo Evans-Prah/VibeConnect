@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using VibeConnect.Api.Extensions;
 using VibeConnect.Friendship.Module.DTOs;
 using VibeConnect.Friendship.Module.Services;
 using VibeConnect.Shared;
@@ -49,6 +50,29 @@ public class FriendshipController(IFriendshipService friendshipService) : BaseCo
     public async Task<IActionResult> GetUserFollowing([FromRoute] string username, [FromQuery] BaseFilter baseFilter)
     {
         var response = await friendshipService.GetUserFollowing(username, baseFilter);
+
+        return ToActionResult(response);
+    }
+    
+    /// <summary>
+    /// Unfollows a user.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint allows a user to unfollow another user.
+    /// </remarks>
+    /// <param name="followeeUsername">The username of the user being unfollowed.</param>
+    /// <returns>The action result of unfollowing a user.</returns>
+    [HttpDelete("unfollow/{followeeUsername}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<bool>))]
+    [ProducesResponseType(StatusCodes.Status424FailedDependency, Type = typeof(ApiResponse<bool>))]
+    [SwaggerOperation("Unfollow a user", OperationId = nameof(UnfollowUser))]
+    public async Task<IActionResult> UnfollowUser([FromRoute] string followeeUsername)
+    {
+        var user = User.GetCurrentUserAccount();
+
+        var response = await friendshipService.UnfollowUser(user.Username, followeeUsername);
 
         return ToActionResult(response);
     }
