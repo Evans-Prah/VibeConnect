@@ -205,6 +205,14 @@ public class FriendshipService(IBaseRepository<Storage.Entities.Friendship> frie
                     };
                 }
                 
+                var remainingFriendship = await friendshipRepository.FindOneAsync(f =>
+                    f.FollowerId == followingUser.Id && f.FollowingId == user.Id);
+                
+                if (remainingFriendship != null)
+                {
+                    remainingFriendship.IsMutual = false;
+                    await friendshipRepository.UpdateAsync(remainingFriendship);
+                }
 
                 user.TotalFollowing--;
                 followingUser.TotalFollowers--;
@@ -274,7 +282,6 @@ public class FriendshipService(IBaseRepository<Storage.Entities.Friendship> frie
                     Message = "User not found, check and try again"
                 };
             }
-            
 
             var followingUser = await userRepository.FindOneAsync(u => u.Username == followingUsername);
             if (followingUser == null)
@@ -293,11 +300,12 @@ public class FriendshipService(IBaseRepository<Storage.Entities.Friendship> frie
             {
                 return new ApiResponse<bool>
                 {
-                    ResponseCode = (int)HttpStatusCode.NotFound,
-                    Message = "Friendship not found, check and try again"
+                    ResponseCode = (int)HttpStatusCode.BadRequest,
+                    Message = "You are not following this user"
                 };
             }
 
+            // Delete the friendship record
             var deleteFriendship = await friendshipRepository.DeleteAsync(friendship);
             if (deleteFriendship < 1)
             {
@@ -307,30 +315,45 @@ public class FriendshipService(IBaseRepository<Storage.Entities.Friendship> frie
                     Message = $"Could not unfollow {followingUsername}, please try again"
                 };
             }
-            
-            
 
-            // Update TotalFollowings for the user who initiated the unfollow
+            // Check if there is a mutual friendship and update it
+            var remainingFriendship = await friendshipRepository.FindOneAsync(f =>
+                f.FollowerId == followingUser.Id && f.FollowingId == user.Id);
+
+            if (remainingFriendship != null)
+            {
+                remainingFriendship.IsMutual = false;
+                await friendshipRepository.UpdateAsync(remainingFriendship);
+
+                followingUser.TotalFollowers--;
+                await userRepository.UpdateAsync(followingUser);
+            }
+            else
+            {
+                followingUser.TotalFollowers--;
+                await userRepository.UpdateAsync(followingUser);
+            }
+
+            // Update the TotalFollowing for the user who initiated the unfollow
             user.TotalFollowing--;
-            followingUser.TotalFollowers--;
             await userRepository.UpdateAsync(user);
-            await userRepository.UpdateAsync(followingUser);
 
             return new ApiResponse<bool>
             {
                 ResponseCode = (int)HttpStatusCode.OK,
-                Message = "User unfollowed successfully",
+                Message = "Successfully unfollowed user",
                 Data = true
             };
         }
         catch (Exception e)
         {
             logger.LogError(e, "An error occurred while unfollowing user -> Service: {service} -> Method: {method}.",
-                nameof(FriendshipService), nameof(UnfollowUser));
+                nameof(FriendRequestService), nameof(UnfollowUser));
+
             return new ApiResponse<bool>
             {
                 ResponseCode = (int)HttpStatusCode.InternalServerError,
-                Message = "Something bad happened when unfollowing user"
+                Message = "Something bad happened, please try again later."
             };
         }
     }

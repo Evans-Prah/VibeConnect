@@ -14,7 +14,7 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
 {
     private const int MaximumDailyFriendRequestLimit = 50;
 
-    public async Task<ApiResponse<object>> SendFriendRequest(string? senderUsername,FriendRequestDto friendRequestDto)
+    public async Task<ApiResponse<object>> SendFriendRequest(string? senderUsername, FriendRequestDto friendRequestDto)
     {
         try
         {
@@ -38,7 +38,6 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
             }
             
             var exceedsLimit = await ExceedsFriendRequestLimit(sender.Id);
-
             if (exceedsLimit)
             {
                 return new ApiResponse<object>
@@ -48,7 +47,6 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
                 };
             }
 
-            
             var receiver = await userRepository.FindOneAsync(u => u.Username == friendRequestDto.ReceiverUsername);
             if (receiver == null)
             {
@@ -64,10 +62,10 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
                 return new ApiResponse<object>
                 {
                     ResponseCode = (int)HttpStatusCode.BadRequest,
-                    Message = "You can't send friend request to yourself"
+                    Message = "You can't send a friend request to yourself"
                 };
             }
-            
+
             if (Enum.TryParse(receiver.AccountStatus, out AccountStatus status) && status != AccountStatus.Active)
             {
                 return new ApiResponse<object> 
@@ -98,13 +96,12 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
                     Message = $"You have a pending friend request from {receiver.Username}."
                 };
             }
-            
-            var existingFriend = await friendshipRepository
-                .FindOneAsync(f => 
-                    ((f.FollowerId == receiver.Id && f.FollowingId == sender.Id) || 
-                     (f.FollowerId == sender.Id && f.FollowingId == receiver.Id)) &&
-                    f.IsMutual);
-            
+
+            var existingFriend = await friendshipRepository.FindOneAsync(f =>
+                ((f.FollowerId == receiver.Id && f.FollowingId == sender.Id) || 
+                 (f.FollowerId == sender.Id && f.FollowingId == receiver.Id)) &&
+                f.IsMutual);
+
             if (existingFriend != null)
             {
                 return new ApiResponse<object>
@@ -143,7 +140,7 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
             if (friendshipDbResponse < 1)
             {
                 await friendRequestRepository.DeleteAsync(friendRequest);
-            
+
                 return new ApiResponse<object>
                 {
                     ResponseCode = (int)HttpStatusCode.FailedDependency,
@@ -328,29 +325,45 @@ public class FriendRequestService (IBaseRepository<FriendshipRequest> friendRequ
                 };
             }
 
-            var existingFriendship = await friendshipRepository
-                .FindOneAsync(f => (f.FollowerId == request.SenderId && f.FollowingId == user.Id));
-            
-            if (existingFriendship == null)
+            var existingFriendship = await friendshipRepository.FindOneAsync(f =>
+                f.FollowerId == request.SenderId && f.FollowingId == user.Id);
+
+            if (existingFriendship != null)
             {
-                return new ApiResponse<bool>
+                existingFriendship.IsMutual = true;
+                await friendshipRepository.UpdateAsync(existingFriendship);
+            }
+            else
+            {
+                var newFriendshipReceiver = new Storage.Entities.Friendship
                 {
-                    ResponseCode = (int)HttpStatusCode.NotFound,
-                    Message = "Existing friendship not found"
+                    FollowerId = user.Id,
+                    FollowingId = request.SenderId,
+                    IsMutual = true
                 };
+
+                await friendshipRepository.AddAsync(newFriendshipReceiver);
             }
 
-            existingFriendship.IsMutual = true;
-            await friendshipRepository.UpdateAsync(existingFriendship);
-
-            var newFriendshipReceiver = new Storage.Entities.Friendship
+            var senderFriendship = await friendshipRepository.FindOneAsync(f =>
+                f.FollowerId == user.Id && f.FollowingId == request.SenderId);
+            
+            if (senderFriendship == null)
             {
-                FollowerId = user.Id,
-                FollowingId = request.SenderId,
-                IsMutual = true
-            };
+                var newFriendshipSender = new Storage.Entities.Friendship
+                {
+                    FollowerId = user.Id,
+                    FollowingId = request.SenderId,
+                    IsMutual = true
+                };
 
-            await friendshipRepository.AddAsync(newFriendshipReceiver);
+                await friendshipRepository.AddAsync(newFriendshipSender);
+            }
+            else
+            {
+                senderFriendship.IsMutual = true;
+                await friendshipRepository.UpdateAsync(senderFriendship);
+            }
 
             var senderUser = await userRepository.GetByIdAsync(request.SenderId);
             if (senderUser != null)
