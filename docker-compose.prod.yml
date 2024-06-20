@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  api:
+    image: ${DOCKER_USERNAME}/vibeconnect:${VERSION_TAG}
+    ports:
+      - "8080:8080"
+    networks:
+      - general-network
+    volumes:
+      - /opt/vibeconnect/config/appsettings.Production.json:/app/appsettings.Production.json
+    environment:
+      DB_CONNECTION_STRING: "Host=${DB_HOST};Port=5432;Username=${DB_USERNAME};Password=${DB_PASSWORD};Database=${DB_NAME};Pooling=true;CommandTimeout=120;Timeout=30"
+
+networks:
+  general-network:
+    driver: bridge
