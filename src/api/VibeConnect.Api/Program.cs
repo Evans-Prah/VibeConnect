@@ -14,6 +14,14 @@ const string corsPolicyName = "VibeConnect.Api";
 var services = builder.Services;
 var config = builder.Configuration;
 
+// Load appsettings.Production.json for production environment
+if (builder.Environment.IsProduction())
+{
+    config.AddJsonFile("appsettings.Production.json", optional: true, reloadOnChange: true);
+}
+// Optionally, load additional configuration sources (e.g., environment variables)
+config.AddEnvironmentVariables();
+
 // Add services to the container.
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? config.GetConnectionString("DbConnection");
 
