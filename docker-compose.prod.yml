@@ -10,7 +10,8 @@ services:
     volumes:
       - /opt/vibeconnect/config/appsettings.Production.json:/app/appsettings.Production.json
     environment:
-      DB_CONNECTION_STRING: "Host=${DB_HOST};Port=5432;Username=${DB_USERNAME};Password=${DB_PASSWORD};Database=${DB_NAME};Pooling=true;CommandTimeout=120;Timeout=30"
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_CONNECTION_STRING: ${DB_CONNECTION_STRING}
 
 networks:
   general-network:
